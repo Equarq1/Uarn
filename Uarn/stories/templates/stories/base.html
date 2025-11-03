@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Uarn Stories{% endblock %}</title>
+
+    <!-- Подключаем CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Навигация -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'stories:index' %}" class="logo">📖 Uarn Stories</a>
+            <nav>
+                <a href="{% url 'stories:index' %}">Главная</a>
+                <a href="{% url 'stories:add_story' %}">Добавить историю</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <p>© {{ year|default:2025 }} Uarn Stories — делись своими историями ✨</p>
+    </footer>
+</body>
+</html>

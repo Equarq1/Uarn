@@ -1,0 +1,39 @@
+{% extends 'stories/base.html' %}
+{% load static %}
+
+{% block title %}Все истории{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Истории пользователей</h1>
+
+    <!-- 🔍 Фильтр по жанрам -->
+    <form method="get" action="{% url 'stories:index' %}" class="filter-form">
+        <label for="genre">Фильтровать по жанру:</label>
+        <select name="genre" id="genre" onchange="this.form.submit()">
+            <option value="">Все жанры</option>
+            {% for genre in genres %}
+                <option value="{{ genre }}" {% if genre == selected_genre %}selected{% endif %}>{{ genre }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- 📝 Список историй -->
+    <div class="stories-list">
+        {% for story in stories %}
+            <div class="story-card">
+                <h2>{{ story.title }}</h2>
+                <p class="genre">Жанр: {{ story.genre }}</p>
+                <p class="author">Автор: {{ story.author }}</p>
+                <p class="content">{{ story.content|truncatewords:50 }}</p>
+            </div>
+        {% empty %}
+            <p>Пока нет историй 😔</p>
+        {% endfor %}
+    </div>
+
+    <div class="add-link">
+        <a href="{% url 'stories:add_story' %}" class="add-btn">+ Добавить историю</a>
+    </div>
+</div>
+{% endblock %}
