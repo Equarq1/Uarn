@@ -1,19 +1,17 @@
 {% extends 'stories/base.html' %}
 
-{% block title %}Добавить историю{% endblock %}
+{% block title %}Добавить историю — Uarn Stories{% endblock %}
 
 {% block content %}
-    <div class="col-md-8 mx-auto">
-        <h2 class="mb-4">Добавить новую историю</h2>
+<div class="container">
+    <h1>Добавить историю</h1>
 
-        <form method="POST" class="card p-4 shadow-sm">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary w-100 mt-3">Опубликовать</button>
-        </form>
+    <form method="post" class="story-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="submit-btn">Опубликовать</button>
+    </form>
 
-        <div class="text-center mt-3">
-            <a href="{% url 'stories:index' %}" class="text-decoration-none">← Вернуться к историям</a>
-        </div>
-    </div>
+    <a href="{% url 'stories:index' %}" class="back-link">← Вернуться на главную</a>
+</div>
 {% endblock %}

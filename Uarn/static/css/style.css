@@ -1,14 +1,22 @@
+/* Общий стиль */
 body {
-    font-family: "Segoe UI", sans-serif;
-    margin: 0;
-    background-color: #f9f9f9;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: #f9fafb;
     color: #333;
+    margin: 0;
 }
 
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* Навигация */
 .navbar {
     background-color: #0078d7;
-    padding: 10px 0;
     color: white;
+    padding: 15px 0;
 }
 
 .nav-container {
@@ -31,23 +39,119 @@ body {
     text-decoration: underline;
 }
 
-.main-content {
-    padding: 30px;
-    max-width: 800px;
-    margin: 0 auto;
+.logo {
+    font-size: 18px;
+    font-weight: bold;
 }
 
+/* Контент */
+h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #222;
+}
+
+.filter-form {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.stories-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.story-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.story-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.story-card h2 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #0078d7;
+}
+
+.meta {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.excerpt {
+    line-height: 1.5;
+}
+
+.no-stories {
+    text-align: center;
+    color: #777;
+}
+
+/* Форма добавления */
+.story-form {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+.story-form input, .story-form textarea, .story-form select {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.submit-btn {
+    background-color: #0078d7;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #005fa3;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #0078d7;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Футер */
 .footer {
     text-align: center;
-    padding: 15px 0;
-    background-color: #f0f0f0;
-    font-size: 14px;
-    margin-top: 40px;
+    background: #f1f1f1;
     color: #555;
-}
-
-.logo {
-    font-weight: bold;
-    font-size: 18px;
-    text-decoration: none;
+    padding: 15px 0;
+    margin-top: 50px;
+    font-size: 14px;
 }

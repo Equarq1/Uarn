@@ -22,7 +22,7 @@ def add_story(request):
         form = StoryForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('index')
+            return redirect('stories:index')
     else:
         form = StoryForm()
     return render(request, 'stories/add_story.html', {'form': form})
