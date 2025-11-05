@@ -4,18 +4,38 @@
 {% block title %}Все истории — Uarn{% endblock %}
 
 {% block content %}
+<input type="text" id="searchBox" placeholder="Поиск по историям..." class="search-input">
+<ul id="searchResults"></ul>
+
+<script>
+document.getElementById('searchBox').addEventListener('input', function() {
+  const query = this.value;
+  if (query.length < 2) {
+    document.getElementById('searchResults').innerHTML = '';
+    return;
+  }
+  fetch(`/search/?q=${encodeURIComponent(query)}`)
+    .then(response => response.json())
+    .then(data => {
+      const list = data.results.map(item => 
+        `<li><a href="#">${item.title} — ${item.author || 'Аноним'}</a></li>`
+      ).join('');
+      document.getElementById('searchResults').innerHTML = list;
+    });
+});
+</script>
 <div class="container">
     <h1>Истории пользователей</h1>
 
-    <form method="get" action="{% url 'stories:index' %}" class="filter-form">
-        <label for="genre">Фильтр по жанрам:</label>
-        <select name="genre" id="genre" onchange="this.form.submit()">
-            <option value="">Все жанры</option>
-            {% for genre in genres %}
-                <option value="{{ genre }}" {% if genre == selected_genre %}selected{% endif %}>{{ genre }}</option>
-            {% endfor %}
-        </select>
-    </form>
+    <div class="tags">
+        <a href="{% url 'stories:index' %}">Все</a>
+        {% for tag in tags %}
+            <a href="?tag={{ tag.name }}" 
+            class="{% if tag.name == selected_tag %}active{% endif %}">
+            #{{ tag.name }}
+            </a>
+        {% endfor %}
+    </div>
 
     <div class="stories-grid">
         {% for story in stories %}
@@ -29,4 +49,5 @@
         {% endfor %}
     </div>
 </div>
+
 {% endblock %}
