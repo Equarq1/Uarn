@@ -4,7 +4,7 @@ from .models import Story
 class StoryForm(forms.ModelForm):
     class Meta:
         model = Story
-        fields = ['title', 'content', 'author']  # убираем 'tags' отсюда!
+        fields = ['title', 'content', 'author']
         labels = {
             'title': 'Заголовок',
             'content': 'Текст истории',

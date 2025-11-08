@@ -1,0 +1,57 @@
+{% extends 'stories/base.html' %}
+{% load static %}
+
+{% block title %}{{ story.title }} — Uarn Stories{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="story-full">
+        <h1>{{ story.title }}</h1>
+        
+        <div class="story-meta">
+            <span class="author">{{ story.author }}</span>
+            <span class="date">{{ story.created_at|date:"d.m.Y" }}</span>
+        </div>
+
+        {% if story.tags.all %}
+        <div class="story-tags">
+            {% for tag in story.tags.all %}
+                <span class="story-tag">#{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="story-content">
+            {{ story.content|linebreaks }}
+        </div>
+
+        <a href="{% url 'stories:index' %}" class="back-link">← Вернуться к списку историй</a>
+    </div>
+</div>
+
+<style>
+.story-full {
+    background: var(--surface);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+}
+.story-meta {
+    color: var(--muted);
+    margin: 16px 0;
+    font-size: 15px;
+}
+.story-meta .author {
+    font-weight: 600;
+    margin-right: 12px;
+}
+.story-content {
+    line-height: 1.7;
+    margin: 24px 0;
+    color: var(--text);
+}
+.story-content p {
+    margin-bottom: 1.2em;
+}
+</style>
+{% endblock %}

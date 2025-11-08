@@ -1,53 +1,197 @@
 {% extends 'stories/base.html' %}
 {% load static %}
 
-{% block title %}Все истории — Uarn{% endblock %}
+{% block title %}Все истории — Uarn Stories{% endblock %}
 
 {% block content %}
-<input type="text" id="searchBox" placeholder="Поиск по историям..." class="search-input">
-<ul id="searchResults"></ul>
-
-<script>
-document.getElementById('searchBox').addEventListener('input', function() {
-  const query = this.value;
-  if (query.length < 2) {
-    document.getElementById('searchResults').innerHTML = '';
-    return;
-  }
-  fetch(`/search/?q=${encodeURIComponent(query)}`)
-    .then(response => response.json())
-    .then(data => {
-      const list = data.results.map(item => 
-        `<li><a href="#">${item.title} — ${item.author || 'Аноним'}</a></li>`
-      ).join('');
-      document.getElementById('searchResults').innerHTML = list;
-    });
-});
-</script>
 <div class="container">
     <h1>Истории пользователей</h1>
 
-    <div class="tags">
-        <a href="{% url 'stories:index' %}">Все</a>
+    <!-- Теги -->
+    <div class="tag-list">
+        <a href="#" class="tag all active" data-query="">Все</a>
         {% for tag in tags %}
-            <a href="?tag={{ tag.name }}" 
-            class="{% if tag.name == selected_tag %}active{% endif %}">
-            #{{ tag.name }}
-            </a>
+            <a href="#" class="tag" data-query="#{{ tag.name }}">#{{ tag.name }}</a>
         {% endfor %}
     </div>
 
-    <div class="stories-grid">
-        {% for story in stories %}
-            <div class="story-card">
-                <h2>{{ story.title }}</h2>
-                <p class="meta">Автор: <strong>{{ story.author }}</strong> | Жанр: {{ story.genre }}</p>
-                <p class="excerpt">{{ story.content|truncatewords:40 }}</p>
-            </div>
-        {% empty %}
-            <p class="no-stories">Пока нет историй 😔</p>
-        {% endfor %}
+  <!-- Поле поиска (текст) и фильтр по тегам -->
+  <div class="search-section">
+    <div class="search-group">
+      <label for="searchBox" class="search-label">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Поиск историй
+      </label>
+      <input id="searchBox" placeholder="Введите текст для поиска..." class="search-input">
     </div>
+    
+    <div class="search-group">
+      <label for="tagFilter" class="search-label">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        Фильтр по тегам
+      </label>
+      <input id="tagFilter" placeholder="Введите теги через запятую..." class="search-input" />
+    </div>
+  </div>
+
+  <!-- Разделитель -->
+  <div class="section-divider">
+    <span class="divider-text">Найденные истории</span>
+  </div>
+
+  <!-- Контейнер для историй -->
+  <div id="storiesContainer" class="stories-grid"></div>
 </div>
+
+<!-- Подключаем Tagify -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.querySelector('#searchBox');
+  const storiesContainer = document.getElementById('storiesContainer');
+
+  // Список всех тегов для автоподсказки
+  const existingTags = [
+    {% for tag in tags %}
+      "{{ tag.name }}",
+    {% endfor %}
+  ];
+
+  // 💡 Настраиваем Tagify для поля тегов (отдельное поле от текстового поиска)
+  const tagInput = document.querySelector('#tagFilter');
+  const tagify = new Tagify(tagInput, {
+    whitelist: existingTags,
+    dropdown: {
+      enabled: 1,
+      maxItems: 10,
+      classname: "tags-look",
+      fuzzySearch: true,
+      position: "input",
+      highlightFirst: true,
+    },
+    enforceWhitelist: false,
+    delimiters: ",", // теги через запятую
+    // поддерживаем кириллицу и прочие символы
+    pattern: /^#?[^\s#]+$/u,
+    // сохраняем значение input как CSV: tag1,tag2
+    originalInputValueFormat: valuesArr => valuesArr.map(v => v.value).join(',')
+  });
+
+  // короткие ссылки на элементы
+  const searchBox = document.querySelector('#searchBox');
+  const tagFilterInput = tagInput; // original input element
+
+  // 🚀 Функция для рендеринга историй
+  function performSearchAndRender(q, tags) {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (tags) params.set('tags', tags);
+    const url = `/search/?${params.toString()}`;
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        if (data.results.length === 0) {
+          storiesContainer.innerHTML = `<p class="no-stories">Ничего не найдено 😔</p>`;
+          return;
+        }
+
+        const html = data.results.map(s => `
+          <div class="story-card">
+            <h2>${s.title}</h2>
+            <p class="meta">Автор: <strong>${s.author}</strong></p>
+            <p class="excerpt">${s.excerpt}</p>
+            ${s.tags && s.tags.length ? 
+              `<div class="story-tags">${s.tags.map(t => `<span class="story-tag">#${t}</span>`).join(' ')}</div>` 
+              : ''}
+            <div class="card-actions">
+              <a href="/story/${s.id}/" class="read-more">Читать полностью →</a>
+            </div>
+          </div>
+        `).join('');
+
+
+        storiesContainer.innerHTML = html;
+      });
+  }
+  storiesContainer.addEventListener('click', e => {
+  if (e.target.classList.contains('toggle-btn')) {
+    const card = e.target.closest('.story-card');
+    const excerpt = card.querySelector('.excerpt');
+    const full = card.querySelector('.full-content');
+
+    if (full.classList.contains('hidden')) {
+      full.classList.remove('hidden');
+      excerpt.style.display = 'none';
+      e.target.textContent = 'Свернуть';
+    } else {
+      full.classList.add('hidden');
+      excerpt.style.display = '';
+      e.target.textContent = 'Читать полностью';
+    }
+  }
+});
+
+
+  // debounce helper
+  function debounce(fn, wait) {
+    let t = null;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), wait);
+    };
+  }
+
+  // Вызывается при изменении текста поиска
+    const onSearchInput = debounce(() => {
+    const q = searchBox.value.trim();
+    const tags = tagFilterInput.value || '';
+    performSearchAndRender(q, tags);
+  }, 250);
+
+  searchBox.addEventListener('input', onSearchInput);
+
+  // При изменении тегов запускаем поиск
+  tagify.on('change', () => {
+    const q = searchBox.value.trim();
+    const tags = tagFilterInput.value || '';
+    performSearchAndRender(q, tags);
+  });
+
+  // 🔖 Клик по тегу сверху
+  document.querySelectorAll('.tag').forEach(tagEl => {
+    tagEl.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+      tagEl.classList.add('active');
+
+      const tagQuery = tagEl.dataset.query;
+      if (tagQuery === '') {
+        tagify.removeAllTags();
+        searchBox.value = '';
+        performSearchAndRender('', '');
+      } else {
+        tagify.addTags([tagQuery.replace('#', '')]);
+        // let Tagify update the underlying input value, then trigger search
+        setTimeout(() => {
+          const q = searchBox.value.trim();
+          const tags = tagFilterInput.value || '';
+          performSearchAndRender(q, tags);
+        }, 0);
+      }
+    });
+  });
+
+  // Показать все истории при загрузке
+  performSearchAndRender('');
+});
+</script>
 
 {% endblock %}
